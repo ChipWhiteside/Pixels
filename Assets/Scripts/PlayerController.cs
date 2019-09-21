@@ -5,64 +5,95 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    private Rigidbody2D rb;
 
     private int action;
     private float moving;
-    private float moveSpeed;
+    public float jumpForce;
+    private float jumpDiv;
+    private float speed;
+    public float walkSpeed; //slowest
+    public float jogSpeed; //default speed
+    public float sprintSpeed; //after walking long enough you sprint
+
     private bool isGrounded;
+    public Transform feetPos;
+    public float checkRadius;
+    public LayerMask whatIsGround;
     private bool isJumping;
 
-    public Rigidbody2D rb;
-    public GameObject player;
+    private float jumpTimeCounter;
+    public float jumpTime;
+    private float sprintTimeCounter;
+    public float sprintTime;
+
+    private float momentum;
 
     // Start is called before the first frame update
     void Start()
     {
-        action = 0;
-        moving = 0f;
-        moveSpeed = 5f;
-        isJumping = false;
-        //for (int i = 0; i < 6; i++)
-        //{
-        //    action = i;
-        //    TryingTo();
-        //}
+        rb = GetComponent<Rigidbody2D>();
+        jumpDiv = 2;
+        speed = jogSpeed;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButton("Horizontal"))
+        isGrounded = Physics2D.OverlapCircle(feetPos.position, checkRadius, whatIsGround);
+
+        if (isGrounded == true && Input.GetKeyDown(KeyCode.Space))
         {
-            //print(Input.GetAxis("Horizontal"));
-            int dir = (Input.GetAxis("Horizontal") >= 0) ? 1 : -1;
-            MoveHorizontal(dir);
+            isJumping = true;
+            jumpTimeCounter = jumpTime;
+            rb.velocity = Vector2.up * jumpForce;
         }
 
-        if (Input.GetButton("Jump"))
+        if (Input.GetKey(KeyCode.Space))
         {
-            action = 1;
-            TryingTo();
+            if (jumpTimeCounter > 0 && isJumping && jumpForce > .25f)
+            {
+                rb.velocity = Vector2.up * (jumpForce);
+                jumpDiv *= 2f;
+                print("jumpDiv: " + jumpDiv + "jumpForce: " + jumpForce / jumpDiv);
+                jumpTimeCounter -= Time.deltaTime;
+            }
+            else
+            {
+                isJumping = false;
+                jumpDiv = 2;
+            }
         }
+
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            isJumping = false;
+            jumpDiv = 2;
+        }
+        if (Input.GetKeyUp(KeyCode.LeftArrow) || Input.GetKeyUp(KeyCode.RightArrow))
+        {
+            print("arrow key up");
+            sprintTimeCounter = sprintTime; //reset sprint time back if movement is stopped
+            speed = jogSpeed;
+        }
+
     }
 
     private void FixedUpdate()
     {
-        if (isJumping)
+        moving = Input.GetAxisRaw("Horizontal");
+        rb.velocity = new Vector2(moving * speed, rb.velocity.y);
+        if (moving != 0)
         {
-            rb.AddForce(Vector2.up * 100f);
+            if (sprintTimeCounter < 0)
+            {
+                speed = sprintSpeed;
+            }
+            else
+            {
+                sprintTimeCounter -= Time.deltaTime;
+            }
         }
-    }
-
-    void MoveHorizontal(float dir)
-    {
-        //public static Vector3 SmoothDamp(Vector3 current, Vector3 target, ref Vector3 currentVelocity, float smoothTime, float maxSpeed = Mathf.Infinity, float deltaTime = Time.deltaTime);
-
-        transform.position += new Vector3(dir, 0, 0) * moveSpeed * Time.deltaTime;
-        //spriteRenderer.flipX = false;
-        //float MoveVec = dir * speed;
-        //print("dir: " + dir + " | Moving: " + MoveVec);
-        //rb.AddForce(new Vector2(MoveVec, 0));
     }
 
     /*
@@ -83,7 +114,7 @@ public class PlayerController : MonoBehaviour
             case 1:
                 print(action + ": Jump");
                 action = 0;
-                isJumping = true;
+                //isJumping = true;
                 break;
             case 2:
                 print(action + ": Dash");
@@ -108,27 +139,4 @@ public class PlayerController : MonoBehaviour
         }
         return true;
     }
-
-
-    //private bool IsGrounded()
-    //{
-    //    if (rb.velocity <= 0)
-    //    {
-    //        foreach (Transform point in groundPoints)
-    //        {
-    //            Collider2D[] colliders = Physics2D.OverlapCircleAll(point.position, groundRadius, whatIsGround);
-    //            for (int i = 0; i < colliders.Length; i++)
-    //            {
-    //                if (colliders[i].gameObject != gameObject)
-    //                {
-    //                    return true;
-    //                }
-    //            }
-    //        }
-    //    }
-    //    return false;
-    //}
-
-
-
 }
