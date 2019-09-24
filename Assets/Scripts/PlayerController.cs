@@ -9,12 +9,17 @@ public class PlayerController : MonoBehaviour
 
     private int action;
     private float moving;
-    public float jumpForce;
     private float jumpDiv;
     private float speed;
     public float walkSpeed; //slowest
     public float jogSpeed; //default speed
     public float sprintSpeed; //after walking long enough you sprint
+    private int facing;
+    private float dashTimeCounter;
+    public float dashTime;
+    public float dashSpeed;
+    private bool hasDashed;
+    private bool isDashing;
 
     private bool isGrounded;
     public Transform feetPos;
@@ -22,10 +27,11 @@ public class PlayerController : MonoBehaviour
     public LayerMask whatIsGround;
     private bool isJumping;
 
+    public float jumpForce;
     private float jumpTimeCounter;
     public float jumpTime;
-    private float sprintTimeCounter;
-    public float sprintTime;
+    //private float sprintTimeCounter;
+    //public float sprintTime;
 
     private float momentum;
 
@@ -33,8 +39,10 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        jumpDiv = 2;
+        //jumpDiv = 2;
         speed = jogSpeed;
+        facing = 1;
+        hasDashed = false;
     }
 
     // Update is called once per frame
@@ -42,7 +50,14 @@ public class PlayerController : MonoBehaviour
     {
         isGrounded = Physics2D.OverlapCircle(feetPos.position, checkRadius, whatIsGround);
 
-        if (isGrounded == true && Input.GetKeyDown(KeyCode.Space))
+        if (isGrounded)
+        {
+            hasDashed = false;
+            //isJumping = false;
+            //isDashing = false;
+        }
+
+        if (isGrounded && Input.GetKeyDown(KeyCode.Space))
         {
             isJumping = true;
             jumpTimeCounter = jumpTime;
@@ -51,30 +66,42 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKey(KeyCode.Space))
         {
-            if (jumpTimeCounter > 0 && isJumping && jumpForce > .25f)
+            print("jTC > 0: " + (jumpTimeCounter > 0));
+            print("isjumping: " + isJumping);
+            if (jumpTimeCounter > 0 && isJumping)
             {
+                print("jumpTimeCounter: " + jumpTimeCounter + " JumpTime: "+ jumpTime);
                 rb.velocity = Vector2.up * (jumpForce);
-                jumpDiv *= 2f;
-                print("jumpDiv: " + jumpDiv + "jumpForce: " + jumpForce / jumpDiv);
+                //jumpDiv *= 2f;
+                //print("jumpDiv: " + jumpDiv + "jumpForce: " + jumpForce / jumpDiv);
                 jumpTimeCounter -= Time.deltaTime;
             }
             else
             {
+                //print("falling");
+
                 isJumping = false;
-                jumpDiv = 2;
+                //jumpDiv = 2;
             }
         }
 
         if (Input.GetKeyUp(KeyCode.Space))
         {
             isJumping = false;
-            jumpDiv = 2;
+            //jumpDiv = 2;
         }
-        if (Input.GetKeyUp(KeyCode.LeftArrow) || Input.GetKeyUp(KeyCode.RightArrow))
+
+        //if (Input.GetKeyUp(KeyCode.LeftArrow) || Input.GetKeyUp(KeyCode.RightArrow))
+        //{
+        //    print("arrow key up");
+        //    sprintTimeCounter = sprintTime; //reset sprint time back if movement is stopped
+        //    speed = jogSpeed;
+        //}
+
+        if (!hasDashed && Input.GetKeyDown(KeyCode.LeftShift))
         {
-            print("arrow key up");
-            sprintTimeCounter = sprintTime; //reset sprint time back if movement is stopped
-            speed = jogSpeed;
+            isDashing = true;
+            dashTimeCounter = dashTime;
         }
 
     }
@@ -83,15 +110,20 @@ public class PlayerController : MonoBehaviour
     {
         moving = Input.GetAxisRaw("Horizontal");
         rb.velocity = new Vector2(moving * speed, rb.velocity.y);
-        if (moving != 0)
+
+        if (isDashing)
         {
-            if (sprintTimeCounter < 0)
+            print("dashing");
+            if (dashTimeCounter > 0)
             {
-                speed = sprintSpeed;
+                rb.velocity = Vector2.right * moving * dashSpeed;
+                print("Moving: " + moving);
+                dashTimeCounter -= Time.deltaTime;
             }
             else
             {
-                sprintTimeCounter -= Time.deltaTime;
+                isDashing = false;
+                hasDashed = true;
             }
         }
     }
