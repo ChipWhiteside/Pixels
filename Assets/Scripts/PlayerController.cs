@@ -27,22 +27,28 @@ public class PlayerController : MonoBehaviour
     public LayerMask whatIsGround;
     private bool isJumping;
 
-    public float jumpForce;
+    public float jumpForceSet;
+    private float jumpForce;
     private float jumpTimeCounter;
     public float jumpTime;
+    private float divTimeCounter;
+    private float divTime;
     //private float sprintTimeCounter;
     //public float sprintTime;
 
     private float momentum;
+    private Camera main;
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        //jumpDiv = 2;
         speed = jogSpeed;
         facing = 1;
         hasDashed = false;
+        facing = 1;
+        jumpForce = jumpForceSet;
+        main = Camera.main;
     }
 
     // Update is called once per frame
@@ -53,50 +59,36 @@ public class PlayerController : MonoBehaviour
         if (isGrounded)
         {
             hasDashed = false;
-            //isJumping = false;
-            //isDashing = false;
+            jumpForce = jumpForceSet;
         }
 
         if (isGrounded && Input.GetKeyDown(KeyCode.Space))
         {
             isJumping = true;
             jumpTimeCounter = jumpTime;
+            divTime = jumpTime / 5;
+            divTimeCounter = divTime;
             rb.velocity = Vector2.up * jumpForce;
         }
 
         if (Input.GetKey(KeyCode.Space))
         {
-            print("jTC > 0: " + (jumpTimeCounter > 0));
-            print("isjumping: " + isJumping);
             if (jumpTimeCounter > 0 && isJumping)
             {
-                print("jumpTimeCounter: " + jumpTimeCounter + " JumpTime: "+ jumpTime);
                 rb.velocity = Vector2.up * (jumpForce);
-                //jumpDiv *= 2f;
-                //print("jumpDiv: " + jumpDiv + "jumpForce: " + jumpForce / jumpDiv);
+                print("JumpForce: " + jumpForce);
                 jumpTimeCounter -= Time.deltaTime;
             }
             else
             {
-                //print("falling");
-
                 isJumping = false;
-                //jumpDiv = 2;
             }
         }
 
         if (Input.GetKeyUp(KeyCode.Space))
         {
             isJumping = false;
-            //jumpDiv = 2;
         }
-
-        //if (Input.GetKeyUp(KeyCode.LeftArrow) || Input.GetKeyUp(KeyCode.RightArrow))
-        //{
-        //    print("arrow key up");
-        //    sprintTimeCounter = sprintTime; //reset sprint time back if movement is stopped
-        //    speed = jogSpeed;
-        //}
 
         if (!hasDashed && Input.GetKeyDown(KeyCode.LeftShift))
         {
@@ -104,20 +96,45 @@ public class PlayerController : MonoBehaviour
             dashTimeCounter = dashTime;
         }
 
+        if (isJumping)
+        {
+            if (divTimeCounter <= 0)
+            {
+                divTimeCounter = divTime;
+                jumpForce = jumpForce - 1.5f;
+            }
+            else
+            {
+                divTimeCounter -= Time.deltaTime;
+            }
+        }
+
+        main.transform.position = new Vector3(this.transform.position.x, this.transform.position.y, -10);
+
+
     }
 
     private void FixedUpdate()
     {
         moving = Input.GetAxisRaw("Horizontal");
+        if (moving > 0)
+        {
+            facing = 1;
+            transform.rotation = new Quaternion(0, 0, 0, 0);
+        }
+        else if (moving < 0)
+        {
+            facing = -1;
+            transform.rotation = new Quaternion(0, 180, 0, 0);
+        }
         rb.velocity = new Vector2(moving * speed, rb.velocity.y);
 
         if (isDashing)
         {
-            print("dashing");
             if (dashTimeCounter > 0)
             {
-                rb.velocity = Vector2.right * moving * dashSpeed;
-                print("Moving: " + moving);
+                rb.velocity = Vector2.right * facing * dashSpeed;
+
                 dashTimeCounter -= Time.deltaTime;
             }
             else
@@ -126,6 +143,8 @@ public class PlayerController : MonoBehaviour
                 hasDashed = true;
             }
         }
+
+        
     }
 
     /*

@@ -230,8 +230,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 1894014281}
-  m_RootOrder: 1
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &640416934
 GameObject:
@@ -2450,7 +2450,7 @@ Transform:
   - {fileID: 640416935}
   - {fileID: 1927612764}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1529989748
 GameObject:
@@ -23112,7 +23112,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1894014280
 GameObject:
@@ -23147,9 +23147,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 129583422}
-  - {fileID: 519420032}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1894014282
 SpriteRenderer:
@@ -23275,7 +23274,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8ed52d35122341bba1162a201403c3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 10
   walkSpeed: 2
   jogSpeed: 5
   sprintSpeed: 8
@@ -23286,8 +23284,8 @@ MonoBehaviour:
   whatIsGround:
     serializedVersion: 2
     m_Bits: 2048
-  jumpTime: 0.2
-  sprintTime: 1
+  jumpForceSet: 11
+  jumpTime: 0.25
 --- !u!1 &1927612763
 GameObject:
   m_ObjectHideFlags: 0
